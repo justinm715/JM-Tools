@@ -1,11 +1,17 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import tailwind from "@astrojs/tailwind";
 
 // https://astro.build/config
 export default defineConfig({
   integrations: [
     starlight({
       title: "My Docs",
+      customCss: [
+        // Path to your Tailwind base styles:
+        "./src/styles/tailwind.css",
+        "./src/styles/custom.css",
+      ],
       social: {
         github: "https://github.com/withastro/starlight",
       },
@@ -14,18 +20,29 @@ export default defineConfig({
           label: "Guides",
           items: [
             // Each item here is one entry in the navigation menu.
-            { label: "Example Guide", link: "/guides/example/" },
+            {
+              label: "Example Guide",
+              link: "/guides/example/",
+            },
           ],
         },
         {
           label: "Reference",
-          autogenerate: { directory: "reference" },
+          autogenerate: {
+            directory: "reference",
+          },
         },
         {
-          label: "PDFs",
-          autogenerate: { directory: "PDFs" },
+          label: "Tools",
+          autogenerate: {
+            directory: "tools",
+          },
         },
       ],
+    }),
+    tailwind({
+      // Disable the default base styles:
+      applyBaseStyles: false,
     }),
   ],
 });
