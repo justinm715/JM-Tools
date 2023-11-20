@@ -52,12 +52,12 @@
           <span class="text-lg font-semibold"
             >Page {{ pageData[0]["Page"] }}</span
           ><br />
-          <a
-            class="cursor-pointer text-xs underline rounded text-gray-400"
+          <span
+            class="cursor-pointer text-xs rounded text-gray-400 underline"
             @click="copyTableData(pageIndex)"
-          >
+            ><Icon name="external" />
             Copy Data
-          </a>
+          </span>
         </div>
         <table class="min-w-full divide-y divide-gray-200 text-sm">
           <thead>
@@ -196,17 +196,53 @@ const uploadFile = () => {
 
 const copyTableData = (pageIndex) => {
   const pageData = responseData.value[pageIndex];
-  const tabDelimitedText = pageData
-    .map((row) => Object.values(row).join("\t"))
-    .join("\n");
-  navigator.clipboard.writeText(tabDelimitedText).then(
-    () => {
-      alert("Table data copied to clipboard!");
-    },
-    (err) => {
-      alert("Failed to copy table data: ", err);
-    },
-  );
+
+  // Define the desired order of the columns
+  const columnOrder = [
+    "Region",
+    "Element Type",
+    "Element Label",
+    "Height (ft)",
+    "Weight (psf)",
+    "Snow Weight (psf)",
+    "Length (ft)",
+    "Area (sf)",
+    "Total Weight (lbs)",
+  ];
+
+  // Check if pageData is not empty
+  if (pageData && pageData.length > 0) {
+    // Create the headers row from the columnOrder array
+    const headers = columnOrder.join("\t");
+
+    // Map the rows according to the column order
+    const rows = pageData
+      .map((row) =>
+        columnOrder
+          .map((column) => {
+            const cell = row[column];
+            // If the cell contains special characters, wrap it in quotes
+            return typeof cell === "string" && /[\r\n\t,]/.test(cell)
+              ? `"${cell.replace(/"/g, '""')}"`
+              : cell;
+          })
+          .join("\t"),
+      )
+      .join("\n");
+
+    // Combine headers and rows
+    const tabDelimitedText = `${headers}\n${rows}`;
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(tabDelimitedText).then(
+      () => {
+        alert("Table data copied to clipboard!");
+      },
+      (err) => {
+        alert(`Failed to copy table data: ${err}`);
+      },
+    );
+  }
 };
 </script>
 
