@@ -1,4 +1,5 @@
 :root {
+  /* Decrease the size of headings */
   --sl-text-xs: 0.8125rem;
   --sl-text-sm: 0.875rem;
   --sl-text-base: 1rem;
@@ -9,4 +10,14 @@
   --sl-text-4xl: 1.5rem;
   --sl-text-5xl: 2rem;
   --sl-text-6xl: 3rem;
+
+  /* Maximize content space */
+  --sl-content-width: 100% - 1rem; /* 45rem */
+}
+
+/* Make the main page content pane occupy full width but leave room for the sidebar */
+@media (min-width: 72rem) {
+  .right-sidebar-container + .main-pane {
+    width: calc(100% - var(--sl-sidebar-width) - 1rem) !important;
+  }
 }
