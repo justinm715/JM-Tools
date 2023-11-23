@@ -49,3 +49,9 @@
 .ql-editor h5 {
   margin-top: 0 !important;
 }
+
+.ql-snow .ql-editor code,
+.ql-snow .ql-editor pre {
+  background: white !important;
+  border: none !important;
+}

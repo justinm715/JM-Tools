@@ -120,9 +120,5 @@ onMounted(async () => {
 </script>
 
 <style>
-.ql-snow .ql-editor code,
-.ql-snow .ql-editor pre {
-  background: white;
-  border: none;
-}
+
 </style>
