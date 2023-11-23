@@ -1,105 +1,102 @@
 <template>
-  <div class="container mx-auto py-4">
-    <div
-      class="border-dashed border-4 rounded py-2 text-center"
-      :class="{ 'bg-blue-100': isDragOver, 'border-gray-200': !isDragOver }"
-      @drop.prevent="handleFileDrop"
-      @dragover.prevent="isDragOver = true"
-      @dragenter.prevent="isDragOver = true"
-      @dragleave.prevent="isDragOver = false"
+  <div
+    class="border-dashed border-4 rounded py-2 text-center mt-2"
+    :class="{ 'bg-blue-100': isDragOver, 'border-gray-200': !isDragOver }"
+    @drop.prevent="handleFileDrop"
+    @dragover.prevent="isDragOver = true"
+    @dragenter.prevent="isDragOver = true"
+    @dragleave.prevent="isDragOver = false"
+  >
+    <p>Drag and drop your PDF file here, or click to select a file</p>
+    <!-- Hidden File Input -->
+    <input
+      type="file"
+      accept=".pdf"
+      @change="handleFileSelect"
+      hidden
+      ref="fileInput"
+    />
+
+    <!-- File Select Button -->
+    <button
+      class="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 text-sm rounded inline-flex items-center"
+      @click="triggerFileInput"
     >
-      <p>Drag and drop your PDF file here, or click to select a file</p>
-      <!-- Hidden File Input -->
-      <input
-        type="file"
-        accept=".pdf"
-        @change="handleFileSelect"
-        hidden
-        ref="fileInput"
-      />
+      <span>Select File</span>
+    </button>
+    <button
+      class="mt-4 bg-blue-500 text-white py-2 px-4 ml-2 text-sm rounded"
+      :class="{ 'opacity-50 cursor-not-allowed': isUploading }"
+      @click="uploadFile"
+      :disabled="isUploading"
+    >
+      Upload PDF
+    </button>
 
-      <!-- File Select Button -->
-      <button
-        class="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 text-sm rounded inline-flex items-center"
-        @click="triggerFileInput"
-      >
-        <span>Select File</span>
-      </button>
-      <button
-        class="mt-4 bg-blue-500 text-white py-2 px-4 ml-2 text-sm rounded"
-        :class="{ 'opacity-50 cursor-not-allowed': isUploading }"
-        @click="uploadFile"
-        :disabled="isUploading"
-      >
-        Upload PDF
-      </button>
-
-      <div class="mt-4">
-        <span class="mr-2" v-if="fileName">{{ fileName }}</span>
-        <progress :value="uploadProgress" max="100"></progress>
-        <p class="text-green-500" v-if="successMessage">{{ successMessage }}</p>
-      </div>
+    <div class="mt-4">
+      <span class="mr-2" v-if="fileName">{{ fileName }}</span>
+      <progress :value="uploadProgress" max="100"></progress>
+      <p class="text-green-500" v-if="successMessage">{{ successMessage }}</p>
     </div>
+  </div>
 
-    <!-- Render tables from response data -->
-    <div v-if="responseData.length > 0">
-      <div
-        v-for="(pageData, pageIndex) in responseData"
-        :key="pageIndex"
-        class="mb-8"
-      >
-        <div class="mb-2">
-          <span class="text-lg font-semibold"
-            >Page {{ pageData[0]["Page"] }}</span
-          ><br />
-          <span
-            class="cursor-pointer text-xs rounded text-gray-400 underline"
-            @click="copyTableData(pageIndex)"
-            ><Icon name="external" />
-            Copy Data
-          </span>
-        </div>
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-          <thead>
-            <tr class="bg-gray-100">
-              <th class="px-2 py-1 text-left">Region</th>
-              <th class="px-2 py-1 text-left">Element Type</th>
-              <th class="px-2 py-1 text-left">Element Label</th>
-              <th class="px-2 py-1 text-right">Height (ft)</th>
-              <th class="px-2 py-1 text-right">Weight (psf)</th>
-              <th class="px-2 py-1 text-right">Snow Weight (psf)</th>
-              <th class="px-2 py-1 text-right">Length (ft)</th>
-              <th class="px-2 py-1 text-right">Area (sf)</th>
-              <th class="px-2 py-1 text-right">Total Weight (lbs)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in pageData" :key="item">
-              <td class="px-2 py-1">{{ item["Region"] }}</td>
-              <td class="px-2 py-1">{{ item["Element Type"] }}</td>
-              <td class="px-2 py-1">{{ item["Element Label"] }}</td>
-              <td class="px-2 py-1 text-right">
-                {{ formatNumber(item["Height (ft)"]) }}
-              </td>
-              <td class="px-2 py-1 text-right">
-                {{ formatNumber(item["Weight (psf)"]) }}
-              </td>
-              <td class="px-2 py-1 text-right">
-                {{ formatNumber(item["Snow Weight (psf)"]) }}
-              </td>
-              <td class="px-2 py-1 text-right">
-                {{ formatNumber(item["Length (ft)"]) }}
-              </td>
-              <td class="px-2 py-1 text-right">
-                {{ formatNumber(item["Area (sf)"]) }}
-              </td>
-              <td class="px-2 py-1 text-right">
-                {{ formatNumber(item["Total Weight (lbs)"]) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+  <!-- Render tables from response data -->
+  <div v-if="responseData.length > 0">
+    <div
+      v-for="(pageData, pageIndex) in responseData"
+      :key="pageIndex"
+      class="mb-8"
+    >
+      <div class="mb-2">
+        <span class="text-lg font-semibold">Page {{ pageData[0]["Page"] }}</span
+        ><br />
+        <span
+          class="cursor-pointer text-xs rounded text-gray-400 underline"
+          @click="copyTableData(pageIndex)"
+          ><Icon name="external" />
+          Copy Data
+        </span>
       </div>
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-2 py-1 text-left">Region</th>
+            <th class="px-2 py-1 text-left">Element Type</th>
+            <th class="px-2 py-1 text-left">Element Label</th>
+            <th class="px-2 py-1 text-right">Height (ft)</th>
+            <th class="px-2 py-1 text-right">Weight (psf)</th>
+            <th class="px-2 py-1 text-right">Snow Weight (psf)</th>
+            <th class="px-2 py-1 text-right">Length (ft)</th>
+            <th class="px-2 py-1 text-right">Area (sf)</th>
+            <th class="px-2 py-1 text-right">Total Weight (lbs)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in pageData" :key="item">
+            <td class="px-2 py-1">{{ item["Region"] }}</td>
+            <td class="px-2 py-1">{{ item["Element Type"] }}</td>
+            <td class="px-2 py-1">{{ item["Element Label"] }}</td>
+            <td class="px-2 py-1 text-right">
+              {{ formatNumber(item["Height (ft)"]) }}
+            </td>
+            <td class="px-2 py-1 text-right">
+              {{ formatNumber(item["Weight (psf)"]) }}
+            </td>
+            <td class="px-2 py-1 text-right">
+              {{ formatNumber(item["Snow Weight (psf)"]) }}
+            </td>
+            <td class="px-2 py-1 text-right">
+              {{ formatNumber(item["Length (ft)"]) }}
+            </td>
+            <td class="px-2 py-1 text-right">
+              {{ formatNumber(item["Area (sf)"]) }}
+            </td>
+            <td class="px-2 py-1 text-right">
+              {{ formatNumber(item["Total Weight (lbs)"]) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
