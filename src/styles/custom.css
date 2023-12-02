@@ -42,6 +42,11 @@
   margin-top: 0;
 }
 
+.content
+  :is(img, picture, video, canvas, svg, iframe):not(:where(.not-content *)) {
+  max-width: none;
+}
+
 .ql-editor h1,
 .ql-editor h2,
 .ql-editor h3,
