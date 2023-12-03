@@ -36,7 +36,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { select } from "d3";
+import * as d3 from "d3";
 
 const pdfViewers = ref([]);
 const pdfCanvases = ref([]);
@@ -74,19 +74,40 @@ const loadPdf = async (event) => {
 
 const displayPage = async (pageNum) => {
   const page = await pdfDoc.getPage(pageNum);
-  const viewport = page.getViewport({ scale: zooms.value[pageNum - 1] / 100 });
+  const scale = zooms.value[pageNum - 1] / 100;
+  const viewport = page.getViewport({ scale });
 
+  // Canvas setup
   const pdfCanvas = pdfCanvases.value[pageNum - 1];
   pdfCanvas.width = viewport.width;
   pdfCanvas.height = viewport.height;
   const context = pdfCanvas.getContext("2d");
 
-  const renderContext = {
-    canvasContext: context,
-    viewport: viewport,
-  };
-
+  // Render PDF page
+  const renderContext = { canvasContext: context, viewport };
   await page.render(renderContext).promise;
+
+  // SVG setup
+  createOrUpdateSvg(pageNum, scale);
+};
+
+const createOrUpdateSvg = (pageNum, scale) => {
+  const svgContainer = document.querySelectorAll(".svgContainer")[pageNum - 1];
+  svgContainer.innerHTML = ""; // Clear existing SVG to redraw
+
+  const svg = d3
+    .create("svg")
+    .attr("width", pdfCanvases.value[pageNum - 1].width)
+    .attr("height", pdfCanvases.value[pageNum - 1].height);
+
+  svg
+    .append("circle")
+    .attr("cx", 100 * scale)
+    .attr("cy", 200 * scale)
+    .attr("r", 25 * scale) // radius adjusted for scale
+    .attr("fill", "blue");
+
+  svgContainer.appendChild(svg.node());
 };
 
 const zoomIn = (index) => {
