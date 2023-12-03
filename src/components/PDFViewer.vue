@@ -1,12 +1,17 @@
 <template>
   <div>
     <input type="file" @change="loadPdf" accept="application/pdf" />
-    <div v-for="(zoom, index) in zooms" :key="index" class="mb-4">
+    <div
+      v-for="(zoom, index) in zooms"
+      :key="index"
+      class="mb-3 border-b-2 pb-3"
+    >
       <div class="flex justify-between items-center mb-2">
         <span>Page {{ index + 1 }}</span>
         <div>
-          <button @click="() => zoomIn(index)" class="mr-2">Zoom In</button>
-          <button @click="() => zoomOut(index)">Zoom Out</button>
+          <span class="font-bold text-sm mr-4 w-24">{{ zoom }}%</span>
+          <button @click="() => zoomOut(index)" class="w-10 mr-2">-</button>
+          <button @click="() => zoomIn(index)" class="w-10">+</button>
         </div>
       </div>
       <div class="flex">
@@ -29,7 +34,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from "vue";
-import * as pdf from "../assets/pdf.mjs";
+import * as pdf from "../../public/pdfjs/pdf.mjs";
 
 const pdfViewers = ref([]);
 let pdfDoc = null;
@@ -53,13 +58,12 @@ const loadPdf = async (event) => {
   var { pdfjsLib } = globalThis;
 
   // The workerSrc property shall be specified.
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "//mozilla.github.io/pdf.js/build/pdf.worker.mjs";
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "../../public/pdfjs/pdf.worker.mjs";
 
   const arrayBuffer = await file.arrayBuffer();
   pdfDoc = await pdfjsLib.getDocument(new Uint8Array(arrayBuffer)).promise;
   totalPages.value = pdfDoc.numPages;
-  zooms.value = Array(totalPages.value).fill(1.0);
+  zooms.value = Array(totalPages.value).fill(100); // Initialize with 100%
 
   for (let i = 1; i <= totalPages.value; i++) {
     displayPage(i);
@@ -68,7 +72,7 @@ const loadPdf = async (event) => {
 
 const displayPage = async (pageNum) => {
   const page = await pdfDoc.getPage(pageNum);
-  const viewport = page.getViewport({ scale: zooms.value[pageNum - 1] });
+  const viewport = page.getViewport({ scale: zooms.value[pageNum - 1] / 100 });
 
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
@@ -88,12 +92,15 @@ const displayPage = async (pageNum) => {
 };
 
 const zoomIn = (index) => {
-  zooms.value[index] += 0.25;
+  zooms.value[index] += 25; // Increase zoom by 25%
   displayPage(index + 1);
 };
 
 const zoomOut = (index) => {
-  zooms.value[index] -= 0.25;
+  if (zooms.value[index] > 25) {
+    // Prevent zooming out below 25%
+    zooms.value[index] -= 25; // Decrease zoom by 25%
+  }
   displayPage(index + 1);
 };
 </script>
