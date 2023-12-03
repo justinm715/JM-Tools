@@ -36,38 +36,22 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import * as pdf from "/public/pdfjs/pdf.mjs";
 import { select } from "d3";
 
 const pdfViewers = ref([]);
 const pdfCanvases = ref([]);
-// const svgOverlays = ref([]);
 let pdfDoc = null;
 const zooms = ref([]);
 const totalPages = ref(0);
 
-// const setPdfViewer = (el, i) => {
-//   if (el) {
-//     pdfViewers.value[i] = el;
-//     const pdfCanvas = el.querySelector("canvas");
-//     const svg = d3.create("svg");
-//     const svgContainer = el.querySelector(".svgContainer");
-//     svgContainer.append(svg.node());
-//     pdfCanvases.value[i] = pdfCanvas;
-//     svgOverlays.value[i] = svg;
-
-//     // Example: Add a circle using D3.js
-//     svg
-//       .append("circle")
-//       .attr("cx", 200)
-//       .attr("cy", 300)
-//       .attr("r", 50)
-//       .attr("fill", "blue");
-//   }
-// };
-
 onMounted(() => {
-  // Initialize or load resources if needed
+  let pdfjsScript = document.createElement("script");
+  pdfjsScript.setAttribute(
+    "src",
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.269/pdf.min.mjs",
+  );
+  pdfjsScript.setAttribute("type", "module");
+  document.head.appendChild(pdfjsScript);
 });
 
 const loadPdf = async (event) => {
@@ -75,7 +59,8 @@ const loadPdf = async (event) => {
   if (!file) return;
 
   const { pdfjsLib } = globalThis;
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "/public/pdfjs/pdf.worker.mjs";
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.269/pdf.worker.min.mjs";
 
   const arrayBuffer = await file.arrayBuffer();
   pdfDoc = await pdfjsLib.getDocument(new Uint8Array(arrayBuffer)).promise;
