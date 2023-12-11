@@ -100,14 +100,27 @@ const createOrUpdateSvg = (pageNum, scale) => {
     .attr("width", pdfCanvases.value[pageNum - 1].width)
     .attr("height", pdfCanvases.value[pageNum - 1].height);
 
-  svg
+  const circle = svg
     .append("circle")
     .attr("cx", 100 * scale)
     .attr("cy", 200 * scale)
     .attr("r", 25 * scale) // radius adjusted for scale
     .attr("fill", "blue");
 
+  blink(circle);
+
   svgContainer.appendChild(svg.node());
+};
+
+const blink = (circle) => {
+  circle
+    .transition()
+    .duration(500) // Duration of each blink in milliseconds
+    .attr("opacity", 0) // Make the circle invisible
+    .transition()
+    .duration(500)
+    .attr("opacity", 1) // Make the circle visible again
+    .on("end", () => blink(circle)); // Repeat this process
 };
 
 const zoomIn = (index) => {
