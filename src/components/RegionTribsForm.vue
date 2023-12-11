@@ -1,6 +1,6 @@
 <template>
   <div
-    class="border-dashed border-4 rounded py-2 text-center mt-2"
+    class="border-dashed border-4 rounded py-2 text-center mt-2 mb-4"
     :class="{ 'bg-blue-100': isDragOver, 'border-gray-200': !isDragOver }"
     @drop.prevent="handleFileDrop"
     @dragover.prevent="isDragOver = true"
@@ -27,10 +27,10 @@
     <button
       class="mt-4 bg-blue-500 text-white py-2 px-4 ml-2 text-sm rounded"
       :class="{ 'opacity-50 cursor-not-allowed': isUploading }"
-      @click="uploadFile"
+      @click="analyzePDF"
       :disabled="isUploading"
     >
-      Upload PDF
+      Analyze PDF
     </button>
 
     <div class="mt-4">
@@ -40,8 +40,10 @@
     </div>
   </div>
 
+  <RegionTribsResults v-if="file" :file="file" :results="responseData" />
+
   <!-- Render tables from response data -->
-  <div v-if="responseData.length > 0">
+  <div v-if="responseData.length == -1">
     <div
       v-for="(pageData, pageIndex) in responseData"
       :key="pageIndex"
@@ -103,6 +105,7 @@
 
 <script setup>
 import { ref } from "vue";
+import RegionTribsResults from "./RegionTribsResults.vue";
 
 const file = ref(null);
 const uploadProgress = ref(0);
@@ -143,7 +146,7 @@ const handleFileDrop = (event) => {
   successMessage.value = ""; // Clear the success message
 };
 
-const uploadFile = () => {
+const analyzePDF = () => {
   if (!file.value) {
     alert("Please select a file to upload.");
     return;
